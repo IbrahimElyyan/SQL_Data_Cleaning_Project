@@ -3,13 +3,13 @@
 This project demonstrates a data cleaning workflow in MySQL, following a tutorial by Alex the Analyst on YouTube. The goal of this project is to clean and prepare a dataset for analysis by removing duplicates, standardizing data, handling null or blank values, and removing unnecessary rows and columns.
 
 ## Tutorial Reference
-[Building a Data Cleaning Project in MySQL - Alex the Analyst](https://www.youtube.com/watch?v=4UltKCnnnTA)
+[Data Cleaning in MySQL | Full Project](https://www.youtube.com/watch?v=4UltKCnnnTA)
 
-### Key Steps and Timestamps
-1. **Removing Duplicates**: [8:00](https://www.youtube.com/watch?v=4UltKCnnnTA&t=480s)
-2. **Standardizing Data**: [17:32](https://www.youtube.com/watch?v=4UltKCnnnTA&t=1052s)
-3. **Handling Null/Blank Values**: [33:30](https://www.youtube.com/watch?v=4UltKCnnnTA&t=2010s)
-4. **Removing Unnecessary Columns/Rows**: [46:12](https://www.youtube.com/watch?v=4UltKCnnnTA&t=2772s)
+### Key Steps
+1. **Removing Duplicates**
+2. **Standardizing Data**
+3. **Handling Null/Blank Values**
+4. **Removing Unnecessary Columns/Rows**
 
 ## Workflow Summary
 
