@@ -1,63 +1,90 @@
-# Data Cleaning Project in MySQL
+# SQL Data Cleaning Project
 
-This project is a data cleaning exercise in MySQL, where the main focus is on transforming raw data into a cleaner, more standardized version by addressing issues like duplicates, null or blank values, unnecessary rows and columns, and standardizing the data format.
+This project demonstrates a data cleaning workflow in MySQL, following a tutorial by Alex the Analyst on YouTube. The goal of this project is to clean and prepare a dataset for analysis by removing duplicates, standardizing data, handling null or blank values, and removing unnecessary rows and columns.
 
-The tutorial I followed is available on YouTube by Alex the Analyst, and it covers the following data cleaning tasks:
-- Removing Duplicates
-- Standardizing Data
-- Handling Null/Blank Values
-- Removing Unnecessary Columns and Rows
+## Tutorial Reference
+[Building a Data Cleaning Project in MySQL - Alex the Analyst](https://www.youtube.com/watch?v=4UltKCnnnTA)
 
-You can watch the tutorial here: [Data Cleaning in MySQL | Full Project](https://www.youtube.com/watch?v=4UltKCnnnTA)
+### Key Steps and Timestamps
+1. **Removing Duplicates**: [8:00](https://www.youtube.com/watch?v=4UltKCnnnTA&t=480s)
+2. **Standardizing Data**: [17:32](https://www.youtube.com/watch?v=4UltKCnnnTA&t=1052s)
+3. **Handling Null/Blank Values**: [33:30](https://www.youtube.com/watch?v=4UltKCnnnTA&t=2010s)
+4. **Removing Unnecessary Columns/Rows**: [46:12](https://www.youtube.com/watch?v=4UltKCnnnTA&t=2772s)
 
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Code Walkthrough](#code-walkthrough)
-   - [Step 1: Remove Duplicates](#step-1-remove-duplicates)
-   - [Step 2: Standardize the Data](#step-2-standardize-the-data)
-   - [Step 3: Handling Null/Blank Values](#step-3-handling-nullblank-values)
-   - [Step 4: Remove Unnecessary Rows and Columns](#step-4-remove-unnecessary-rows-and-columns)
-3. [How to Run the Project](#how-to-run-the-project)
-4. [Contributing](#contributing)
-
-## Project Overview
-In this project, we work with a dataset related to layoffs, performing the following data cleaning operations:
-1. **Removing Duplicates:** Identifying and eliminating duplicate records.
-2. **Standardizing Data:** Ensuring consistent formatting and categorization.
-3. **Handling Null/Blank Values:** Addressing missing or blank data.
-4. **Removing Unnecessary Columns/Rows:** Cleaning the dataset by removing irrelevant or empty rows and columns.
-
-### Steps Covered in the Tutorial
-1. **Remove Duplicates** – We identify duplicate records based on multiple fields like company name, location, industry, and others.
-2. **Standardize the Data** – Standardize certain columns (e.g., trimming spaces, normalizing country names, converting dates to standard formats).
-3. **Handling Null/Blank Values** – We clean up records with null or blank values in essential fields.
-4. **Remove Unnecessary Rows and Columns** – Remove rows and columns that contain irrelevant or incomplete data.
-
----
-
-## Code Walkthrough
+## Workflow Summary
 
 ### Step 1: Remove Duplicates
-In this step, we create a staging table, `layoffs_staging`, and copy all data into it. We then use a `ROW_NUMBER()` function to identify duplicates based on relevant columns. Duplicates are then removed using a `DELETE` statement.
+- Identified duplicates using `ROW_NUMBER()` with `PARTITION BY` on relevant columns.
+- Verified duplicates by querying for rows with duplicate counts.
+- Deleted duplicate rows while retaining unique records.
 
--- Create a staging table for data manipulation
-CREATE TABLE layoffs_staging LIKE layoffs;
+### Step 2: Standardize Data
+- Trimmed leading/trailing spaces from text columns.
+- Standardized values (e.g., unifying variations of "Crypto" and "United States").
+- Converted `date` column from text to `DATE` format using `STR_TO_DATE()` and altered the column type.
 
--- Copy data into the staging table
-INSERT layoffs_staging
+### Step 3: Handle Null/Blank Values
+- Identified rows with null or blank values in key columns.
+- Used `JOIN` queries to fill missing `industry` values based on the same company.
+- Updated empty values in `industry` to `NULL` for consistency.
+
+### Step 4: Remove Unnecessary Rows and Columns
+- Removed rows where both `total_laid_off` and `percentage_laid_off` were null.
+- Dropped the `row_num` column used during duplicate identification.
+
+## SQL Code
+The full SQL script used in this project is included below:
+
+```sql
+-- Data Cleaning Project
+
 SELECT *
 FROM layoffs;
 
--- Identify duplicate records using ROW_NUMBER() function
+-- Step 1: Remove Duplicates
+CREATE TABLE layoffs_staging LIKE layoffs;
+INSERT layoffs_staging SELECT * FROM layoffs;
+
 WITH duplicate_CTE AS (
-  SELECT *, ROW_NUMBER() OVER(
-    PARTITION BY company, location, industry, total_laid_off, percentage_laid_off, `date`, stage, country, funds_raised_millions
-  ) AS row_num
+  SELECT *,
+         ROW_NUMBER() OVER (
+           PARTITION BY company, location, industry, total_laid_off, 
+           percentage_laid_off, date, stage, country, funds_raised_millions
+         ) AS row_num
   FROM layoffs_staging
 )
-SELECT * 
-FROM duplicate_cte
-WHERE row_num > 1;
+SELECT * FROM duplicate_CTE WHERE row_num > 1;
 
--- Remove duplicates
-DELETE FROM layoffs_staging WHERE row_num > 1;
+DELETE FROM layoffs_staging2 WHERE row_num > 1;
+
+-- Step 2: Standardizing Data
+UPDATE layoffs_staging2 SET company = TRIM(company);
+UPDATE layoffs_staging2 SET industry = 'Crypto' WHERE industry LIKE 'Crypto%';
+UPDATE layoffs_staging2 SET country = 'United States' WHERE country LIKE 'United States%';
+UPDATE layoffs_staging2 SET date = STR_TO_DATE(date, '%m/%d/%Y');
+ALTER TABLE layoffs_staging2 MODIFY COLUMN date DATE;
+
+-- Step 3: Handle Null/Blank Values
+UPDATE layoffs_staging2 SET industry = NULL WHERE industry = '';
+UPDATE layoffs_staging2 t1
+JOIN layoffs_staging2 t2
+ON t1.company = t2.company
+SET t1.industry = t2.industry
+WHERE (t1.industry IS NULL OR t1.industry = '') AND (t2.industry IS NOT NULL);
+
+-- Step 4: Remove Unnecessary Rows and Columns
+DELETE FROM layoffs_staging2 WHERE total_laid_off IS NULL AND percentage_laid_off IS NULL;
+ALTER TABLE layoffs_staging2 DROP COLUMN row_num;
+```
+
+## Tools Used
+- **Database**: MySQL
+- **Concepts**: CTEs, Window Functions, String Manipulation, Date Conversion
+
+## How to Use
+1. Clone this repository.
+2. Import the dataset into your MySQL environment.
+3. Run the SQL script step by step to replicate the data cleaning process.
+
+## Credits
+- Tutorial by [Alex the Analyst](https://www.youtube.com/@AlextheAnalyst).
