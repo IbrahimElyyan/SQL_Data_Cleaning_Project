@@ -33,7 +33,7 @@ This project demonstrates a data cleaning workflow in MySQL, following a tutoria
 - Dropped the `row_num` column used during duplicate identification.
 
 ## SQL Code
-The full SQL script used in this project is included below:
+A snippet of the SQL script that is used in this project is included below:
 
 ```sql
 -- Data Cleaning Project
